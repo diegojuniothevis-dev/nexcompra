@@ -20,12 +20,12 @@
   (async()=>{
     const boot=document.getElementById('nxboot'),detail=document.getElementById('nxdetail');
     try{
-      const response=await fetch('erp.html?v=532',{cache:'no-store'});
+      const response=await fetch('erp.html?v=533',{cache:'no-store'});
       if(!response.ok)throw new Error('ERP HTTP '+response.status);
       let source=await response.text();
       detail.textContent='Aplicando a experiência unificada...';
-      source=source.replace(/NexCompra ERP Enterprise 4\.1/g,'NexCompra ERP Enterprise 5.3.2').replace(/NexCompra ERP Enterprise v5\.[0-9.]+/g,'NexCompra ERP Enterprise v5.3.2');
-      // Hotfix v5.3.2: /rest/v1/ retorna 401 mesmo quando Auth e tabelas estão operando normalmente.
+      source=source.replace(/NexCompra ERP Enterprise 4\.1/g,'NexCompra ERP Enterprise 5.3.3').replace(/NexCompra ERP Enterprise v5\.[0-9.]+/g,'NexCompra ERP Enterprise v5.3.3');
+      // Hotfix v5.3.3: /rest/v1/ retorna 401 mesmo quando Auth e tabelas estão operando normalmente.
       // A conexão real é validada pelas chamadas autenticadas do cliente Supabase.
       source=source.replace(/const health = await fetch\(NX_SUPABASE_URL \+ "\/rest\/v1\/", \{[\s\S]*?if \(!health\.ok && health\.status !== 404\) throw new Error\("API HTTP " \+ health\.status\);/g,`const health = { ok:true, status:200 };`);
       source=source.replace('if ((x.textContent || "").toLowerCase().includes("banco local")) {','if (/banco local|supabase/.test((x.textContent || "").toLowerCase())) {');
@@ -83,7 +83,7 @@
   iframe{width:100%!important;max-width:100%!important}
   .modal,.dialog,[role="dialog"]{max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;overflow:auto!important}
 }
-</style><script id="nx-mobile-behavior">(()=>{function setupMobile(){if(!matchMedia('(max-width:850px)').matches)return;if(document.getElementById('nxMobileMenu'))return;document.body.classList.add('nx-mobile-app');const backdrop=document.createElement('div');backdrop.id='nxMobileBackdrop';backdrop.setAttribute('aria-hidden','true');const button=document.createElement('button');button.id='nxMobileMenu';button.type='button';button.innerHTML='<span aria-hidden="true">☰</span><span>Módulos</span>';button.setAttribute('aria-label','Abrir menu de módulos');const close=()=>{document.body.classList.remove('nx-mobile-nav-open');button.setAttribute('aria-expanded','false')};const toggle=()=>{const open=document.body.classList.toggle('nx-mobile-nav-open');button.setAttribute('aria-expanded',String(open))};button.addEventListener('click',toggle);backdrop.addEventListener('click',close);document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});document.querySelector('nav.tabs')?.addEventListener('click',e=>{if(e.target.closest('.tab'))setTimeout(close,80)});document.body.append(backdrop,button)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupMobile);else setupMobile();addEventListener('resize',setupMobile)})();</script>`;
+</style><script id="nx-mobile-behavior">(()=>{function setupMobile(){if(!matchMedia('(max-width:850px)').matches)return;if(document.getElementById('nxMobileMenu'))return;document.body.classList.add('nx-mobile-app');const backdrop=document.createElement('div');backdrop.id='nxMobileBackdrop';backdrop.setAttribute('aria-hidden','true');const button=document.createElement('button');button.id='nxMobileMenu';button.type='button';button.innerHTML='<span aria-hidden="true">☰</span><span>Módulos</span>';button.setAttribute('aria-label','Abrir menu de módulos');const close=()=>{document.body.classList.remove('nx-mobile-nav-open');button.setAttribute('aria-expanded','false')};const toggle=()=>{const open=document.body.classList.toggle('nx-mobile-nav-open');button.setAttribute('aria-expanded',String(open))};button.addEventListener('click',toggle);backdrop.addEventListener('click',close);document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});document.querySelector('nav.tabs')?.addEventListener('click',e=>{if(e.target.closest('.tab'))setTimeout(close,80)});document.body.append(backdrop,button)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupMobile);else setupMobile();addEventListener('resize',setupMobile)})();<\/script>`;
       const sessionBridge=`<script>try{if(!Object.prototype.hasOwnProperty.call(window,'ncSession'))Object.defineProperty(window,'ncSession',{configurable:true,get:()=>ncSession})}catch(e){console.warn('Sessão global:',e)}<\/script>`;
       source=source.replace('</head>',css+mobileLayer+'</head>').replace('</body>',js+sessionBridge+adminBridge+adminHotfix+'</body>');
       document.open();document.write(source);document.close();
