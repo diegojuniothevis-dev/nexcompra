@@ -1,0 +1,31 @@
+name: Compilar APK NexCompra
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "android-apk/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-apk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Compilar APK instalável
+        run: gradle assembleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NexCompra-ERP-5.3.0-APK
+          path: android-apk/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
