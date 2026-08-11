@@ -1,0 +1,46 @@
+name: Hotfix Supabase status
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hotfix-supabase-status.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  hotfix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Corrigir falso offline do Supabase
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('app.html')
+          s = p.read_text(encoding='utf-8')
+          anchor = "      source=source.replace(/NexCompra ERP Enterprise 4\\.1/g,'NexCompra ERP Enterprise 5.3.0').replace(/NexCompra ERP Enterprise v5\\.[0-9.]+/g,'NexCompra ERP Enterprise v5.3.0');\n"
+          patch = "      // Hotfix v5.3.1: /rest/v1/ retorna 401 mesmo quando Auth e tabelas estão operando normalmente.\n      // A conexão real é validada pelas chamadas autenticadas do cliente Supabase.\n      source=source.replace(/const health = await fetch\\(NX_SUPABASE_URL \\+ \"\\/rest\\/v1\\/\", \\{[\\s\\S]*?if \\(!health\\.ok && health\\.status !== 404\\) throw new Error\\(\"API HTTP \" \\+ health\\.status\\);/g,`const health = { ok:true, status:200 };`);\n"
+          if 'Hotfix v5.3.1' not in s:
+              if anchor not in s:
+                  raise SystemExit('Âncora do app.html não encontrada; hotfix não aplicado.')
+              s = s.replace(anchor, anchor + patch, 1)
+          s = s.replace("fetch('erp.html?v=530'", "fetch('erp.html?v=531'")
+          s = s.replace('NexCompra ERP Enterprise 5.3.0', 'NexCompra ERP Enterprise 5.3.1')
+          s = s.replace('NexCompra ERP Enterprise v5.3.0', 'NexCompra ERP Enterprise v5.3.1')
+          p.write_text(s, encoding='utf-8')
+      - name: Publicar correção
+        run: |
+          if git diff --quiet -- app.html; then
+            echo "Nenhuma alteração necessária."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.html
+          git commit -m "fix: corrige falso status offline do Supabase"
+          git push origin main
