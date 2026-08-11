@@ -10,8 +10,8 @@ android {
         applicationId = "com.nexcompra.erp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "5.3.4"
+        versionCode = 5
+        versionName = "5.3.5"
     }
 
     buildTypes {
