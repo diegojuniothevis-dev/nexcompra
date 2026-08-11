@@ -1,6 +1,6 @@
 # NexCompra para Android
 
-Aplicativo Android do NexCompra ERP Enterprise 5.3.3.
+Aplicativo Android do NexCompra ERP Enterprise 5.3.4.
 
 - Site oficial carregado com conexão HTTPS.
 - Login e sessão do Supabase mantidos no WebView.
