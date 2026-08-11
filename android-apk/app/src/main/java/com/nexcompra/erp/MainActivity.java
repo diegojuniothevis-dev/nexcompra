@@ -44,7 +44,9 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);\n        settings.setTextZoom(100);\n        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setUseWideViewPort(true);
+        settings.setTextZoom(100);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         settings.setBuiltInZoomControls(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
