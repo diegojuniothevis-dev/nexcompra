@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        settings.setUserAgentString(settings.getUserAgentString() + " NexCompraAndroid/5.3.1");
+        settings.setUserAgentString(settings.getUserAgentString() + " NexCompraAndroid/5.3.2");
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
