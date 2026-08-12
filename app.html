@@ -1,71 +1,23 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#082742">
-<title>NexCompra ERP Enterprise</title>
-<style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f4f7fb;font-family:Inter,Segoe UI,Arial,sans-serif}
-#boot{position:fixed;inset:0;display:grid;place-items:center;background:#f4f7fb;z-index:2;color:#17324d;transition:opacity .25s ease,visibility .25s ease}
-#boot.done{opacity:0;visibility:hidden;pointer-events:none}.card{text-align:center}.spin{width:42px;height:42px;margin:0 auto 14px;border:4px solid #dce8f3;border-top-color:#1769c7;border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
-#nxapp{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:1}
-</style>
-</head>
-<body>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#082742"><title>NexCompra ERP Enterprise</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f4f7fb;font-family:Inter,Segoe UI,Arial,sans-serif}#boot{position:fixed;inset:0;display:grid;place-items:center;background:#f4f7fb;z-index:2;color:#17324d;transition:opacity .25s ease,visibility .25s ease}#boot.done{opacity:0;visibility:hidden;pointer-events:none}.card{text-align:center}.spin{width:42px;height:42px;margin:0 auto 14px;border:4px solid #dce8f3;border-top-color:#1769c7;border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}#nxapp{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:1}</style></head><body>
 <div id="boot"><div class="card"><div class="spin"></div><b>Preparando o NexCompra</b><div style="font-size:13px;color:#657b8e;margin-top:7px">Carregando Suite Integrada v9.3...</div></div></div>
-<iframe id="nxapp" title="NexCompra ERP Enterprise" src="NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html?v=934" allow="clipboard-read; clipboard-write"></iframe>
-<script>
-(()=>{
- const frame=document.getElementById('nxapp'),boot=document.getElementById('boot');
- const hideBoot=()=>boot.classList.add('done');
- function enhance(){
-  try{
-   const d=frame.contentDocument,w=frame.contentWindow;if(!d||!d.head)return;
-   if(!d.getElementById('nx-v934-ux')){
-    const st=d.createElement('style');st.id='nx-v934-ux';st.textContent=`
-      :root{--top:64px!important;--modules:56px!important}
-      html{scrollbar-gutter:stable}
-      .shell{grid-template-rows:var(--top) var(--modules) minmax(0,1fr)!important}
-      .topbar{min-height:var(--top)!important;height:var(--top)!important;padding:0 14px!important;gap:11px!important}
-      .brand{min-width:205px!important}.brandmark{width:38px!important;height:38px!important;border-radius:11px!important}.brandcopy b{font-size:16px!important}
-      .sidebar{height:var(--modules)!important;padding:7px 12px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:smooth!important;scrollbar-width:none!important;overscroll-behavior-x:contain!important}
-      .sidebar::-webkit-scrollbar{display:none!important}
-      .nav-list{display:flex!important;align-items:center!important;gap:6px!important;width:max-content!important;min-width:100%!important;min-height:42px!important}
-      .nav-item{flex:0 0 auto!important;min-height:38px!important;padding:7px 12px!important;border-radius:10px!important;transition:background .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease!important}
-      .nav-item:hover{transform:translateY(-1px)!important}.nav-item.active{transform:none!important}
-      .nav-icon{width:27px!important;height:27px!important;border-radius:8px!important}.nav-copy b{font-size:12px!important}
-      .workspace{background:#eef3f7!important;isolation:isolate!important}
-      .frame-stack{overflow:hidden!important;background:#fff!important}
-      .module-frame{transform:translate3d(0,5px,0) scale(.998)!important;opacity:0!important;visibility:hidden!important;will-change:opacity,transform!important;transition:opacity .22s cubic-bezier(.2,.7,.2,1),transform .22s cubic-bezier(.2,.7,.2,1),visibility 0s linear .22s!important}
-      .module-frame.active{opacity:1!important;visibility:visible!important;transform:translate3d(0,0,0) scale(1)!important;transition:opacity .22s cubic-bezier(.2,.7,.2,1),transform .22s cubic-bezier(.2,.7,.2,1)!important}
-      .transition-layer{height:2px!important;transition:opacity .12s ease!important}.transition-card{animation-duration:.62s!important}
-      .launcher{top:12px!important;right:14px!important}
-      @media(min-width:1180px){.nav-list{justify-content:center!important}}
-      @media(max-width:900px){:root{--top:60px!important;--modules:54px!important}.topbar{padding:0 10px!important}.brand{min-width:auto!important}.sidebar{padding:6px 8px!important}.nav-item{padding:6px 10px!important}.nav-copy b{font-size:11.5px!important}}
-      @media(max-width:650px){.nav-item{gap:6px!important}.nav-icon{width:25px!important;height:25px!important}.nav-copy b{font-size:11px!important}.nx-client-profile{max-width:54px!important}.nx-client-meta{display:none!important}}
-      @media(prefers-reduced-motion:reduce){.module-frame,.module-frame.active,.nav-item,.sidebar{transition:none!important;scroll-behavior:auto!important}}
-    `;d.head.appendChild(st);
-   }
-   const centerActive=()=>{const a=d.querySelector('.nav-item.active');if(a)try{a.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest',inline:'center'})}catch(_){}};
-   if(!d.documentElement.dataset.nx934){
-    d.documentElement.dataset.nx934='1';
-    d.addEventListener('click',e=>{const n=e.target.closest?.('.nav-item,[data-module]');if(n)setTimeout(centerActive,180)},true);
-    new MutationObserver(m=>{if(m.some(x=>x.type==='attributes'&&x.attributeName==='class'))setTimeout(centerActive,40)}).observe(d.body,{subtree:true,attributes:true,attributeFilter:['class']});
-    w.addEventListener('resize',()=>setTimeout(centerActive,80));
-   }
-   d.querySelectorAll('.module-frame').forEach(mf=>{
-    try{
-     const normalize=()=>{const md=mf.contentDocument;if(!md||!md.head||md.getElementById('nx-v934-module'))return;const s=md.createElement('style');s.id='nx-v934-module';s.textContent='html{scrollbar-gutter:stable}html,body{min-height:100%;}body{background:#f4f7fb!important;}';md.head.appendChild(s)};
-     mf.addEventListener('load',normalize,{once:false});normalize();
-    }catch(_){ }
-   });
-   centerActive();
-  }catch(e){console.warn('NexCompra UX v9.3.4:',e)}
- }
- frame.addEventListener('load',()=>{hideBoot();enhance();setTimeout(enhance,500);setTimeout(enhance,1600)});
- setTimeout(hideBoot,12000);
-})();
-</script>
-</body>
-</html>
+<iframe id="nxapp" title="NexCompra ERP Enterprise" src="NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html?v=935" allow="clipboard-read; clipboard-write"></iframe>
+<script>(()=>{const frame=document.getElementById('nxapp'),boot=document.getElementById('boot');const hideBoot=()=>boot.classList.add('done');
+function enhance(){try{const d=frame.contentDocument,w=frame.contentWindow;if(!d||!d.head)return;
+if(!d.getElementById('nx-v935-ux')){const st=d.createElement('style');st.id='nx-v935-ux';st.textContent=`:root{--top:64px!important;--modules:56px!important}.shell{grid-template-rows:var(--top) var(--modules) minmax(0,1fr)!important}.topbar{min-height:var(--top)!important;height:var(--top)!important;padding:0 14px!important}.sidebar{height:var(--modules)!important;padding:7px 12px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:smooth!important;scrollbar-width:none!important}.sidebar::-webkit-scrollbar{display:none!important}.nav-list{gap:6px!important;width:max-content!important;min-width:100%!important}.nav-item{flex:0 0 auto!important;min-height:38px!important;padding:7px 12px!important;border-radius:10px!important}.module-frame{transform:translate3d(0,5px,0) scale(.998)!important;opacity:0!important;visibility:hidden!important;transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s!important}.module-frame.active{opacity:1!important;visibility:visible!important;transform:none!important;transition:opacity .22s ease,transform .22s ease!important}.nx-users-module{position:absolute;inset:0;z-index:8;display:none;overflow:auto;background:#eef3f7;padding:18px}.nx-users-module.active{display:block}.nx-u-wrap{max-width:1280px;margin:0 auto}.nx-u-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}.nx-u-title h2{margin:0;color:#17324a;font-size:22px}.nx-u-title p{margin:4px 0 0;color:#6e8193}.nx-u-grid{display:grid;grid-template-columns:380px minmax(0,1fr);gap:14px}.nx-u-card{background:#fff;border:1px solid #d8e3ec;border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(10,35,60,.07)}.nx-u-card h3{margin:0 0 13px}.nx-u-field{margin-bottom:10px}.nx-u-field label{display:block;font-size:11px;font-weight:800;color:#60758a;margin-bottom:4px}.nx-u-field input,.nx-u-field select{width:100%;height:40px;border:1px solid #d5e0e9;border-radius:9px;padding:0 10px;box-sizing:border-box}.nx-u-btn{border:0;border-radius:9px;padding:10px 13px;font-weight:800;cursor:pointer}.nx-u-primary{background:#0877d1;color:#fff}.nx-u-muted{background:#edf3f8;color:#355069}.nx-u-danger{background:#fdebec;color:#a6323a}.nx-u-ok{background:#e9f7ee;color:#247a46}.nx-u-msg{min-height:18px;font-size:12px;margin-top:8px}.nx-u-table{width:100%;border-collapse:collapse;font-size:12px}.nx-u-table th,.nx-u-table td{padding:10px 8px;border-bottom:1px solid #e7edf2;text-align:left}.nx-u-table th{color:#60758a;background:#f7fafc;position:sticky;top:0}.nx-u-badge{display:inline-block;padding:4px 7px;border-radius:999px;background:#edf3f8;font-size:10px;font-weight:800}.nx-u-actions{display:flex;gap:6px;flex-wrap:wrap}.nx-u-empty{padding:30px;text-align:center;color:#7d8d9d}.nx-u-lock{display:none;background:#fff7e8;border:1px solid #f0d39b;color:#7a5818;padding:12px;border-radius:11px;margin-bottom:14px}@media(min-width:1180px){.nav-list{justify-content:center!important}}@media(max-width:900px){:root{--top:60px!important;--modules:54px!important}.nx-u-grid{grid-template-columns:1fr}.nx-users-module{padding:10px}.nx-u-head{align-items:flex-start;flex-direction:column}}`;d.head.appendChild(st)}
+const centerActive=()=>{const a=d.querySelector('.nav-item.active');if(a)try{a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}catch(_){}};
+function installUsers(){if(d.getElementById('nxUsersNav'))return;const nav=d.querySelector('.nav-list'),workspace=d.querySelector('.workspace');if(!nav||!workspace)return;const btn=d.createElement('button');btn.className='nav-item';btn.id='nxUsersNav';btn.type='button';btn.innerHTML='<span class="nav-icon">👥</span><span class="nav-copy"><b>Usuários</b><small>Colaboradores e acessos</small></span>';nav.appendChild(btn);
+const panel=d.createElement('section');panel.className='nx-users-module';panel.id='nxUsersModule';panel.innerHTML=`<div class="nx-u-wrap"><div class="nx-u-head"><div class="nx-u-title"><h2>Usuários e colaboradores</h2><p>Cadastre pessoas, defina perfis de acesso e gerencie quem pode entrar no NexCompra.</p></div><button class="nx-u-btn nx-u-muted" id="nxURefresh">↻ Atualizar</button></div><div class="nx-u-lock" id="nxULock"></div><div class="nx-u-grid"><div class="nx-u-card"><h3 id="nxUFormTitle">Novo colaborador</h3><form id="nxUForm"><input type="hidden" id="nxUId"><div class="nx-u-field"><label>Nome completo</label><input id="nxUName" required placeholder="Nome do colaborador"></div><div class="nx-u-field"><label>E-mail de acesso</label><input id="nxUEmail" type="email" required placeholder="usuario@empresa.com"></div><div class="nx-u-field"><label>Perfil / permissão</label><select id="nxURole"><option>Administrador</option><option>Gerente</option><option>Comprador</option><option>Financeiro</option><option>Fiscal</option><option selected>Consulta</option></select></div><div class="nx-u-field"><label>Senha <span style="font-weight:400">(mín. 6 caracteres)</span></label><input id="nxUPass" type="password" placeholder="Obrigatória no novo usuário"></div><div style="display:flex;gap:8px"><button class="nx-u-btn nx-u-primary" type="submit" id="nxUSave">Salvar usuário</button><button class="nx-u-btn nx-u-muted" type="button" id="nxUCancel" style="display:none">Cancelar</button></div><div class="nx-u-msg" id="nxUMsg"></div></form></div><div class="nx-u-card"><h3>Colaboradores da empresa</h3><div style="overflow:auto;max-height:62vh"><table class="nx-u-table"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead><tbody id="nxUTbody"></tbody></table></div></div></div></div>`;workspace.appendChild(panel);
+const $=s=>panel.querySelector(s), URL='https://ulgocbftudqnntpupwkl.supabase.co/functions/v1/admin-users', KEY='sb_publishable_Z4z1U8uqRzHyY1Cv9G3X4Q_5zaw_un-';let users=[];
+async function invoke(action,payload={}){const sb=w.nxSupabase;if(!sb)throw new Error('Supabase ainda não foi inicializado.');const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Sessão expirada. Entre novamente.');const companyId=localStorage.getItem('nex.activeClientId')||sessionStorage.getItem('nex.session.client');if(!companyId)throw new Error('Empresa atual não identificada.');const r=await fetch(URL,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+session.access_token},body:JSON.stringify({action,company_id:companyId,...payload})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('Erro HTTP '+r.status));return j}
+function reset(){ $('#nxUId').value='';$('#nxUName').value='';$('#nxUEmail').value='';$('#nxURole').value='Consulta';$('#nxUPass').value='';$('#nxUFormTitle').textContent='Novo colaborador';$('#nxUCancel').style.display='none';$('#nxUMsg').textContent=''}
+function render(){const tb=$('#nxUTbody');tb.innerHTML='';if(!users.length){tb.innerHTML='<tr><td colspan="5" class="nx-u-empty">Nenhum colaborador encontrado.</td></tr>';return}users.forEach(u=>{const tr=d.createElement('tr');tr.innerHTML=`<td><b>${esc(u.nome)}</b></td><td>${esc(u.email)}</td><td><span class="nx-u-badge">${esc(u.perfil)}</span></td><td>${u.ativo?'<span class="nx-u-badge" style="background:#e9f7ee;color:#247a46">Ativo</span>':'<span class="nx-u-badge" style="background:#fdebec;color:#a6323a">Inativo</span>'}</td><td><div class="nx-u-actions"><button class="nx-u-btn nx-u-muted" data-edit="${u.id}">Editar</button><button class="nx-u-btn ${u.ativo?'nx-u-danger':'nx-u-ok'}" data-toggle="${u.id}" data-active="${u.ativo?'0':'1'}">${u.ativo?'Desativar':'Ativar'}</button></div></td>`;tb.appendChild(tr)})}
+function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+async function load(){const msg=$('#nxUMsg');msg.textContent='Carregando...';try{const r=await invoke('list');users=r.users||[];render();$('#nxULock').style.display='none';$('#nxUForm').style.display='block';msg.textContent=''}catch(e){users=[];render();$('#nxULock').textContent=e.message;$('#nxULock').style.display='block';$('#nxUForm').style.display='none';msg.textContent=''}}
+btn.onclick=async()=>{d.querySelectorAll('.module-frame').forEach(f=>f.classList.remove('active'));d.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');panel.classList.add('active');const ct=d.getElementById('crumbTitle'),cd=d.getElementById('crumbDesc');if(ct)ct.textContent='Usuários';if(cd)cd.textContent='Colaboradores e permissões';centerActive();await load()};
+d.querySelectorAll('.nav-item:not(#nxUsersNav)').forEach(b=>b.addEventListener('click',()=>panel.classList.remove('active'),true));
+$('#nxURefresh').onclick=load;$('#nxUCancel').onclick=reset;$('#nxUForm').onsubmit=async e=>{e.preventDefault();const id=$('#nxUId').value,nome=$('#nxUName').value.trim(),email=$('#nxUEmail').value.trim(),perfil=$('#nxURole').value,senha=$('#nxUPass').value,msg=$('#nxUMsg');msg.textContent='Salvando...';try{if(id)await invoke('update',{user_id:id,nome,email,perfil,senha});else await invoke('create',{nome,email,perfil,senha});msg.style.color='#247a46';msg.textContent=id?'Usuário atualizado.':'Colaborador criado com sucesso.';reset();await load()}catch(x){msg.style.color='#b33b3b';msg.textContent=x.message}};
+$('#nxUTbody').onclick=async e=>{const eb=e.target.closest('[data-edit]'),tb=e.target.closest('[data-toggle]');if(eb){const u=users.find(x=>x.id===eb.dataset.edit);if(!u)return;$('#nxUId').value=u.id;$('#nxUName').value=u.nome;$('#nxUEmail').value=u.email;$('#nxURole').value=u.perfil;$('#nxUPass').value='';$('#nxUFormTitle').textContent='Editar colaborador';$('#nxUCancel').style.display='inline-block';panel.scrollTo({top:0,behavior:'smooth'})}if(tb){try{await invoke('set_active',{user_id:tb.dataset.toggle,active:tb.dataset.active==='1'});await load()}catch(x){$('#nxUMsg').textContent=x.message}}};}
+installUsers();
+if(!d.documentElement.dataset.nx935){d.documentElement.dataset.nx935='1';d.addEventListener('click',e=>{const n=e.target.closest?.('.nav-item');if(n)setTimeout(centerActive,150)},true);new MutationObserver(()=>{installUsers()}).observe(d.body,{subtree:true,childList:true})}centerActive()}catch(e){console.warn('NexCompra UX v9.3.5:',e)}}
+frame.addEventListener('load',()=>{hideBoot();enhance();setTimeout(enhance,500);setTimeout(enhance,1500)});setTimeout(hideBoot,12000)})();</script></body></html>
