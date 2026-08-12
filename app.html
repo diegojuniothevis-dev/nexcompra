@@ -5,11 +5,67 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#082742">
 <title>NexCompra ERP Enterprise</title>
-<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f4f7fb;font-family:Inter,Segoe UI,Arial,sans-serif}#boot{position:fixed;inset:0;display:grid;place-items:center;background:#f4f7fb;z-index:2;color:#17324d}.card{text-align:center}.spin{width:42px;height:42px;margin:0 auto 14px;border:4px solid #dce8f3;border-top-color:#1769c7;border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:1}</style>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f4f7fb;font-family:Inter,Segoe UI,Arial,sans-serif}
+#boot{position:fixed;inset:0;display:grid;place-items:center;background:#f4f7fb;z-index:2;color:#17324d;transition:opacity .25s ease,visibility .25s ease}
+#boot.done{opacity:0;visibility:hidden;pointer-events:none}.card{text-align:center}.spin{width:42px;height:42px;margin:0 auto 14px;border:4px solid #dce8f3;border-top-color:#1769c7;border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
+#nxapp{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:1}
+</style>
 </head>
 <body>
 <div id="boot"><div class="card"><div class="spin"></div><b>Preparando o NexCompra</b><div style="font-size:13px;color:#657b8e;margin-top:7px">Carregando Suite Integrada v9.3...</div></div></div>
-<iframe id="nxapp" title="NexCompra ERP Enterprise" src="NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html?v=93" allow="clipboard-read; clipboard-write"></iframe>
-<script>const f=document.getElementById('nxapp'),b=document.getElementById('boot');f.addEventListener('load',()=>{b.style.display='none'});setTimeout(()=>{b.style.display='none'},12000);</script>
+<iframe id="nxapp" title="NexCompra ERP Enterprise" src="NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html?v=934" allow="clipboard-read; clipboard-write"></iframe>
+<script>
+(()=>{
+ const frame=document.getElementById('nxapp'),boot=document.getElementById('boot');
+ const hideBoot=()=>boot.classList.add('done');
+ function enhance(){
+  try{
+   const d=frame.contentDocument,w=frame.contentWindow;if(!d||!d.head)return;
+   if(!d.getElementById('nx-v934-ux')){
+    const st=d.createElement('style');st.id='nx-v934-ux';st.textContent=`
+      :root{--top:64px!important;--modules:56px!important}
+      html{scrollbar-gutter:stable}
+      .shell{grid-template-rows:var(--top) var(--modules) minmax(0,1fr)!important}
+      .topbar{min-height:var(--top)!important;height:var(--top)!important;padding:0 14px!important;gap:11px!important}
+      .brand{min-width:205px!important}.brandmark{width:38px!important;height:38px!important;border-radius:11px!important}.brandcopy b{font-size:16px!important}
+      .sidebar{height:var(--modules)!important;padding:7px 12px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:smooth!important;scrollbar-width:none!important;overscroll-behavior-x:contain!important}
+      .sidebar::-webkit-scrollbar{display:none!important}
+      .nav-list{display:flex!important;align-items:center!important;gap:6px!important;width:max-content!important;min-width:100%!important;min-height:42px!important}
+      .nav-item{flex:0 0 auto!important;min-height:38px!important;padding:7px 12px!important;border-radius:10px!important;transition:background .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease!important}
+      .nav-item:hover{transform:translateY(-1px)!important}.nav-item.active{transform:none!important}
+      .nav-icon{width:27px!important;height:27px!important;border-radius:8px!important}.nav-copy b{font-size:12px!important}
+      .workspace{background:#eef3f7!important;isolation:isolate!important}
+      .frame-stack{overflow:hidden!important;background:#fff!important}
+      .module-frame{transform:translate3d(0,5px,0) scale(.998)!important;opacity:0!important;visibility:hidden!important;will-change:opacity,transform!important;transition:opacity .22s cubic-bezier(.2,.7,.2,1),transform .22s cubic-bezier(.2,.7,.2,1),visibility 0s linear .22s!important}
+      .module-frame.active{opacity:1!important;visibility:visible!important;transform:translate3d(0,0,0) scale(1)!important;transition:opacity .22s cubic-bezier(.2,.7,.2,1),transform .22s cubic-bezier(.2,.7,.2,1)!important}
+      .transition-layer{height:2px!important;transition:opacity .12s ease!important}.transition-card{animation-duration:.62s!important}
+      .launcher{top:12px!important;right:14px!important}
+      @media(min-width:1180px){.nav-list{justify-content:center!important}}
+      @media(max-width:900px){:root{--top:60px!important;--modules:54px!important}.topbar{padding:0 10px!important}.brand{min-width:auto!important}.sidebar{padding:6px 8px!important}.nav-item{padding:6px 10px!important}.nav-copy b{font-size:11.5px!important}}
+      @media(max-width:650px){.nav-item{gap:6px!important}.nav-icon{width:25px!important;height:25px!important}.nav-copy b{font-size:11px!important}.nx-client-profile{max-width:54px!important}.nx-client-meta{display:none!important}}
+      @media(prefers-reduced-motion:reduce){.module-frame,.module-frame.active,.nav-item,.sidebar{transition:none!important;scroll-behavior:auto!important}}
+    `;d.head.appendChild(st);
+   }
+   const centerActive=()=>{const a=d.querySelector('.nav-item.active');if(a)try{a.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest',inline:'center'})}catch(_){}};
+   if(!d.documentElement.dataset.nx934){
+    d.documentElement.dataset.nx934='1';
+    d.addEventListener('click',e=>{const n=e.target.closest?.('.nav-item,[data-module]');if(n)setTimeout(centerActive,180)},true);
+    new MutationObserver(m=>{if(m.some(x=>x.type==='attributes'&&x.attributeName==='class'))setTimeout(centerActive,40)}).observe(d.body,{subtree:true,attributes:true,attributeFilter:['class']});
+    w.addEventListener('resize',()=>setTimeout(centerActive,80));
+   }
+   d.querySelectorAll('.module-frame').forEach(mf=>{
+    try{
+     const normalize=()=>{const md=mf.contentDocument;if(!md||!md.head||md.getElementById('nx-v934-module'))return;const s=md.createElement('style');s.id='nx-v934-module';s.textContent='html{scrollbar-gutter:stable}html,body{min-height:100%;}body{background:#f4f7fb!important;}';md.head.appendChild(s)};
+     mf.addEventListener('load',normalize,{once:false});normalize();
+    }catch(_){ }
+   });
+   centerActive();
+  }catch(e){console.warn('NexCompra UX v9.3.4:',e)}
+ }
+ frame.addEventListener('load',()=>{hideBoot();enhance();setTimeout(enhance,500);setTimeout(enhance,1600)});
+ setTimeout(hideBoot,12000);
+})();
+</script>
 </body>
 </html>
