@@ -1,0 +1,105 @@
+name: Package NexCompra Local V9.3.15
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/package-local-v9315.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Montar pacote local
+        shell: bash
+        run: |
+          set -e
+          PKG='NexCompra_V9.3.15_Local'
+          mkdir -p "$PKG"
+
+          cp app.html "$PKG/app.html"
+          cp nexcompra-sync-guard.js "$PKG/nexcompra-sync-guard.js"
+          cp NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html "$PKG/NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html"
+
+          # Arquivos auxiliares da raiz usados pelas versões atuais/legadas.
+          for f in index.html erp.html app-cotacao-v2.html app-apk-cotacao.html; do
+            [ -f "$f" ] && cp "$f" "$PKG/$f"
+          done
+
+          cat > "$PKG/INICIAR_NEXCOMPRA_LOCAL.bat" <<'BAT'
+          @echo off
+          title NexCompra V9.3.15 - Servidor Local
+          cd /d "%~dp0"
+          echo.
+          echo ===============================================
+          echo     NexCompra Enterprise V9.3.15 - LOCAL
+          echo ===============================================
+          echo.
+          echo Iniciando em http://localhost:8080/app.html
+          echo Feche esta janela para encerrar o servidor local.
+          echo.
+
+          where py >nul 2>nul
+          if %errorlevel%==0 goto PYLAUNCHER
+          where python >nul 2>nul
+          if %errorlevel%==0 goto PYTHON
+
+          echo Python 3 nao foi encontrado neste computador.
+          echo Instale o Python 3 ou use INICIAR_NEXCOMPRA_POWERSHELL.bat.
+          pause
+          exit /b 1
+
+          :PYLAUNCHER
+          start "" "http://localhost:8080/app.html?v=9315"
+          py -m http.server 8080 --bind 127.0.0.1
+          exit /b
+
+          :PYTHON
+          start "" "http://localhost:8080/app.html?v=9315"
+          python -m http.server 8080 --bind 127.0.0.1
+          exit /b
+          BAT
+
+          cat > "$PKG/INICIAR_NEXCOMPRA_POWERSHELL.bat" <<'BAT'
+          @echo off
+          cd /d "%~dp0"
+          powershell -NoProfile -ExecutionPolicy Bypass -Command "$p=8080; Start-Process ('http://localhost:'+ $p +'/app.html?v=9315'); if (Get-Command python -ErrorAction SilentlyContinue) { python -m http.server $p --bind 127.0.0.1 } elseif (Get-Command py -ErrorAction SilentlyContinue) { py -m http.server $p --bind 127.0.0.1 } else { Write-Host 'Python 3 nao encontrado. Instale em python.org e execute novamente.'; Read-Host 'Pressione ENTER' }"
+          BAT
+
+          cat > "$PKG/LEIA-ME_LOCAL.txt" <<'TXT'
+          NEXCOMPRA ENTERPRISE V9.3.15 - VERSAO LOCAL
+          ==========================================
+
+          COMO ABRIR NO WINDOWS
+          1. Extraia todo o arquivo ZIP para uma pasta.
+          2. Dê dois cliques em INICIAR_NEXCOMPRA_LOCAL.bat.
+          3. O navegador abrirá em http://localhost:8080/app.html?v=9315
+          4. Mantenha a janela preta aberta enquanto estiver usando o NexCompra.
+          5. Para encerrar, feche a janela preta.
+
+          IMPORTANTE
+          - Esta é a versão local dos arquivos do NexCompra V9.3.15.
+          - O sistema ainda precisa de internet para autenticação e sincronização com o Supabase.
+          - Abrir app.html diretamente por file:// pode bloquear recursos do navegador; por isso use o arquivo INICIAR_NEXCOMPRA_LOCAL.bat.
+          - Os dados de cada empresa continuam armazenados/sincronizados no Supabase conforme as regras do sistema.
+
+          VERSAO: 9.3.15
+          TXT
+
+          printf 'V9.3.15\n' > "$PKG/VERSAO.txt"
+          zip -r -9 NexCompra_V9.3.15_Local.zip "$PKG"
+
+      - name: Publicar artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexCompra_V9.3.15_Local
+          path: NexCompra_V9.3.15_Local.zip
+          if-no-files-found: error
+          retention-days: 7
