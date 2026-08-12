@@ -26,6 +26,6 @@ jobs:
         run: gradle assembleRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: NexCompra-ERP-5.3.4-APK
+          name: NexCompra-ERP-9.3.7-APK
           path: android-apk/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
