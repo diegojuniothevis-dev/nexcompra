@@ -255,7 +255,7 @@ window.nxLoadClientWorkspace=function(){
 <script id="nex-v92-auth-profile-js">
 (function(){
 const URL='https://ulgocbftudqnntpupwkl.supabase.co',KEY='sb_publishable_Z4z1U8uqRzHyY1Cv9G3X4Q_5zaw_un-';
-const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.nxSupabase=sb;
+const sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'nexcompra-auth-v9314'}});window.nxSupabase=sb;
 const $=s=>document.querySelector(s),K={active:'nex.activeClientId',client:'nex.session.client',session:'nex.session.active',user:'nex.session.user'};
 let company=null,user=null,pendingLogo='',timer=null,syncing=false;
 function tab(n){document.querySelectorAll('.nx-auth-tab').forEach(b=>b.classList.toggle('active',b.dataset.authTab===n));$('#nxAuthLogin').classList.toggle('active',n==='login');$('#nxAuthRegister').classList.toggle('active',n==='register')}
