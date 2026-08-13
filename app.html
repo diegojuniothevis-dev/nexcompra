@@ -201,7 +201,21 @@ function embeddedCss(id){
 }
 function cleanHomeQuickAccess(frame){if(!frame||frame.dataset.module!=='home')return;try{const doc=frame.contentDocument;['financeiro','auditoria','usuarios'].forEach(panel=>{doc.querySelectorAll('.tab[data-p="'+panel+'"],nav.tabs [data-p="'+panel+'"]').forEach(el=>{el.hidden=true;el.setAttribute('aria-hidden','true');el.style.setProperty('display','none','important')})})}catch(_e){}}
 function installGlobalUsers(frame){if(!frame||frame.dataset.module!=='home'||!window.nxGlobalUsersApi)return;window.nxGlobalUsersApi.install(frame)}
-function ensureLoaded(id){if(loaded.has(id))return;const f=document.getElementById('frame-'+id);f.addEventListener('load',()=>{try{f.contentWindow.scrollTo({top:0,left:0,behavior:'instant'});cleanHomeQuickAccess(f);installGlobalUsers(f);if(id==='home'){let tries=0;const navTimer=setInterval(()=>{cleanHomeQuickAccess(f);installGlobalUsers(f);if(++tries>=20)clearInterval(navTimer)},100)}}catch(_e){}},{once:true});let html=decode(MODULE_DATA[id]);
+function rehydrateModule(frame,id){
+ try{
+  const w=frame&&frame.contentWindow,d=frame&&frame.contentDocument;if(!w||!d)return;
+  d.querySelectorAll('.auth-screen,#authScreen,.login-screen,.login-overlay,[data-auth-screen]').forEach(el=>{el.style.setProperty('display','none','important');el.setAttribute('aria-hidden','true')});
+  d.querySelectorAll('.app-hidden').forEach(el=>el.classList.remove('app-hidden'));
+  if(id==='home'){
+   if(typeof w.carregar==='function')w.carregar();
+   else if(typeof w.renderAll==='function')w.renderAll();
+   if(typeof w.renderFinanceiro==='function')w.renderFinanceiro();
+   if(typeof w.renderOrcamentos==='function')w.renderOrcamentos();
+   if(typeof w.renderAuditoria==='function')w.renderAuditoria();
+  }
+ }catch(e){console.warn('NexCompra: módulo não pôde ser reidratado',id,e)}
+}
+function ensureLoaded(id){if(loaded.has(id))return;const f=document.getElementById('frame-'+id);f.addEventListener('load',()=>{try{f.contentWindow.scrollTo({top:0,left:0,behavior:'instant'});cleanHomeQuickAccess(f);installGlobalUsers(f);rehydrateModule(f,id);setTimeout(()=>rehydrateModule(f,id),250);if(id==='home'){let tries=0;const navTimer=setInterval(()=>{cleanHomeQuickAccess(f);installGlobalUsers(f);if(tries===1||tries===5)rehydrateModule(f,id);if(++tries>=20)clearInterval(navTimer)},100)}}catch(_e){}},{once:true});let html=decode(MODULE_DATA[id]);
 const nxClientId=(localStorage.getItem('nex.activeClientId')||'guest').replace(/[^a-zA-Z0-9_-]/g,'_');
 const storageScope=`<script id="nx-client-storage-scope">
 (function(){
