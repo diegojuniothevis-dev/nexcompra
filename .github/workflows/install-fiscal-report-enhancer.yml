@@ -1,0 +1,42 @@
+name: Install Fiscal Report Enhancer
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/install-fiscal-report-enhancer.yml'
+      - 'nexcompra-fiscal-report-enhancer.js'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Install enhancer loader
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files=['app.html','NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html']
+          tag='<script src="nexcompra-fiscal-report-enhancer.js?v=1"></script>'
+          for name in files:
+              p=Path(name)
+              if not p.exists(): continue
+              s=p.read_text(encoding='utf-8')
+              if 'nexcompra-fiscal-report-enhancer.js' not in s:
+                  if '</head>' in s:
+                      s=s.replace('</head>',tag+'\n</head>',1)
+                  else:
+                      s=tag+'\n'+s
+                  p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit installed report enhancement
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.html NexCompra_ERP_Suite_Integrada_v9_3_SUPABASE.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'feat: ativa painel gerencial no relatório fiscal'
+          git push origin main
