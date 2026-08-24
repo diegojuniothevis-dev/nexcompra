@@ -18,7 +18,7 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    private static final String APP_URL = "https://diegojuniothevis-dev.github.io/nexcompra/app.html?v=937";
+    private static final String APP_URL = "https://diegojuniothevis-dev.github.io/nexcompra/app.html?v=938";
     private static final int FILE_CHOOSER_REQUEST = 1401;
     private WebView webView;
     private ValueCallback<Uri[]> fileCallback;
@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         s.setJavaScriptCanOpenWindowsAutomatically(true);
         s.setSupportMultipleWindows(false);
-        s.setUserAgentString(s.getUserAgentString() + " NexCompraAndroid/9.3.7");
+        s.setUserAgentString(s.getUserAgentString() + " NexCompraAndroid/9.3.8");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
