@@ -1,0 +1,19 @@
+===== TERM: Fornecedor e valor bruto são obrigatórios | HITS: 0 =====
+
+===== TERM: Datas devem usar AAAA-MM-DD ou DD/MM/AAAA | HITS: 0 =====
+
+===== TERM: Valores podem usar vírgula ou ponto decimal | HITS: 0 =====
+
+===== TERM: Processar dados colados | HITS: 0 =====
+
+===== TERM: Carregar planilha | HITS: 0 =====
+
+===== TERM: Arquivo de lançamentos | HITS: 0 =====
+
+===== TERM: chave NF-e | HITS: 0 =====
+
+===== TERM: chaveNfe | HITS: 0 =====
+
+===== TERM: numero_nf | HITS: 0 =====
+
+===== TERM: fornecedor | HITS: 0 =====
