@@ -11,37 +11,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract relevant snippets
+      - name: Extract exact importer module
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
           s=Path('app.html').read_text(encoding='utf-8', errors='replace')
-          terms=[
-            'Fornecedor e valor bruto são obrigatórios',
-            'Datas devem usar AAAA-MM-DD ou DD/MM/AAAA',
-            'Valores podem usar vírgula ou ponto decimal',
-            'Processar dados colados',
-            'Carregar planilha',
-            'Arquivo de lançamentos',
-            'chave NF-e',
-            'chaveNfe',
-            'numero_nf',
-            'fornecedor'
-          ]
-          out=[]
-          for term in terms:
-              hits=list(re.finditer(re.escape(term), s, re.I))
-              out.append(f'===== TERM: {term} | HITS: {len(hits)} =====')
-              for i,m in enumerate(hits[:8],1):
-                  a=max(0,m.start()-900); b=min(len(s),m.end()+1400)
-                  out.append(f'--- HIT {i} ---\n'+s[a:b])
-          Path('import-snippets-compact.txt').write_text('\n\n'.join(out), encoding='utf-8')
+          phrases=['Notas repetidas do mesmo fornecedor','Processar dados colados','Fornecedor e valor bruto são obrigatórios','Copiar e colar do Excel']
+          hits=[]
+          for ph in phrases:
+              for m in re.finditer(re.escape(ph),s,re.I): hits.append((m.start(),ph))
+          if not hits: raise SystemExit('import UI not found')
+          center=min(x[0] for x in hits)
+          # This app embeds each module as a large HTML string. Capture a focused window around the import screen.
+          a=max(0,center-70000); b=min(len(s),center+90000)
+          w=s[a:b]
+          out=['CENTER='+str(center),'WINDOW='+str(a)+':'+str(b)]
+          # Exact UI context
+          for ph in phrases:
+              i=w.lower().find(ph.lower())
+              if i>=0: out.append('\n===== UI '+ph+' =====\n'+w[max(0,i-2500):i+5000])
+          # Script blocks/functions/calls around importer
+          pats=[r'function\s+[A-Za-z_$][\w$]*\s*\([^)]*\)\s*\{',r'(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*(?:async\s*)?\([^)]*\)\s*=>',r'\.from\s*\(',r'\.insert\s*\(',r'\.upsert\s*\(',r'\.update\s*\(',r'\.select\s*\(',r'addEventListener\s*\(',r'localStorage\.',r'processar',r'importar',r'planilha',r'chave[_A-Za-z-]*nfe',r'numero[_A-Za-z-]*nf']
+          seen=set()
+          for pat in pats:
+              for m in list(re.finditer(pat,w,re.I))[:80]:
+                  aa=max(0,m.start()-1600); bb=min(len(w),m.end()+3200)
+                  key=(aa//500,bb//500)
+                  if key in seen: continue
+                  seen.add(key)
+                  out.append('\n===== CODE '+pat+' @'+str(a+m.start())+' =====\n'+w[aa:bb])
+          text='\n'.join(out)
+          # Cap to connector-friendly size but preserve both beginning and end if huge.
+          if len(text)>180000: text=text[:130000]+'\n\n===== TRUNCATED MIDDLE =====\n\n'+text[-50000:]
+          Path('import-module-exact.txt').write_text(text,encoding='utf-8')
           PY
-      - name: Commit snippets
+      - name: Commit exact module extract
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add import-snippets-compact.txt
-          git commit -m 'chore: refine import logic snippets' || exit 0
+          git add import-module-exact.txt
+          git commit -m 'chore: extract exact importer module' || exit 0
           git push
