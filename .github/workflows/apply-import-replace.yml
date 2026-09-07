@@ -1,0 +1,85 @@
+name: Apply import replace patch
+on:
+  push:
+    branches: [fix-import-replace]
+    paths: ['.github/workflows/apply-import-replace.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch importer in app.html
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, sys
+          p=Path('app.html'); s=p.read_text(encoding='utf-8')
+          # Update user-facing duplicate rule wherever present.
+          s=s.replace('Notas repetidas do mesmo fornecedor não serão duplicadas.','Notas já existentes serão substituídas pelos novos dados importados.')
+          # Inject a compatibility layer into the embedded Compras module.
+          marker='</body></html>'
+          patch=r'''<script id="nx-import-replace-v1">
+(function(){
+  const norm=v=>String(v??'').trim().toLowerCase();
+  const digits=v=>String(v??'').replace(/\D/g,'');
+  const pick=(o,names)=>{for(const n of names){if(o&&o[n]!=null&&String(o[n]).trim()!=='')return o[n]}return ''};
+  const key=o=>{
+    const chave=digits(pick(o,['chave_nfe','chaveNfe','chaveNFe','chave','chave_nf_e','chaveNFE']));
+    if(chave.length>=40)return 'chave:'+chave;
+    const forn=norm(pick(o,['fornecedor','supplier','nome_fornecedor','razao_social','razaoSocial']));
+    const nf=norm(pick(o,['nf','numero_nf','numeroNf','numero_nota','numeroNota','nota','nfe']));
+    return forn&&nf?'fn:'+forn+'|'+nf:'';
+  };
+  const merge=(oldRows,newRows)=>{
+    if(!Array.isArray(oldRows)||!Array.isArray(newRows))return null;
+    const map=new Map(); oldRows.forEach((r,i)=>{const k=key(r);if(k)map.set(k,i)});
+    let inserted=0,updated=0;
+    newRows.forEach(r=>{const k=key(r);if(k&&map.has(k)){oldRows[map.get(k)]={...oldRows[map.get(k)],...r};updated++}else{oldRows.push(r);if(k)map.set(k,oldRows.length-1);inserted++}});
+    return {rows:oldRows,inserted,updated};
+  };
+  // Intercept localStorage saves made by the Compras importer. If an import tries to
+  // append duplicate NF records, preserve one record and let the newest values win.
+  const raw=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(k,v){
+    try{
+      if(this===localStorage && typeof v==='string' && /compra|lanc|mov|nota|purchase/i.test(String(k))){
+        const incoming=JSON.parse(v), prevText=Storage.prototype.getItem.call(this,k), prev=prevText?JSON.parse(prevText):null;
+        if(Array.isArray(incoming)&&Array.isArray(prev)){
+          const prevKeys=new Set(prev.map(key).filter(Boolean));
+          const incomingKeys=new Set(incoming.map(key).filter(Boolean));
+          const looksLikeImport=[...incomingKeys].some(x=>prevKeys.has(x));
+          if(looksLikeImport){
+            const base=prev.map(x=>({...x}));
+            const r=merge(base,incoming);
+            if(r){v=JSON.stringify(r.rows);window.__NX_LAST_IMPORT_RESULT__={novos:r.inserted,atualizados:r.updated};}
+          }
+        }
+      }
+    }catch(e){console.warn('NexCompra: compatibilidade de substituição na importação',e)}
+    return raw.call(this,k,v);
+  };
+  document.addEventListener('click',e=>{
+    const t=(e.target&&e.target.closest)?e.target.closest('button'):null;
+    if(!t)return;
+    if(/processar dados colados|carregar planilha/i.test(t.textContent||'')){
+      setTimeout(()=>{const r=window.__NX_LAST_IMPORT_RESULT__;if(r)console.info(`NexCompra importação: ${r.novos} novos, ${r.atualizados} atualizados`)},500);
+    }
+  });
+})();
+<\/script>'''
+          # app.html is a suite shell containing embedded HTML strings; inject patch before
+          # the final shell closing body so it is present without restructuring the 2MB file.
+          pos=s.rfind(marker)
+          if pos<0: sys.exit('closing marker not found')
+          s=s[:pos]+patch+s[pos:]
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit patched app
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.html
+          git commit -m 'feat: replace existing purchase records during import' || exit 0
+          git push
