@@ -16,22 +16,32 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          p=Path('app.html')
-          s=p.read_text(encoding='utf-8', errors='replace')
-          terms=['Notas repetidas','duplicad','importa','planilha','Processar dados colados','fornecedor','chave NF-e','chave nfe','NF']
+          s=Path('app.html').read_text(encoding='utf-8', errors='replace')
+          terms=[
+            'Fornecedor e valor bruto são obrigatórios',
+            'Datas devem usar AAAA-MM-DD ou DD/MM/AAAA',
+            'Valores podem usar vírgula ou ponto decimal',
+            'Processar dados colados',
+            'Carregar planilha',
+            'Arquivo de lançamentos',
+            'chave NF-e',
+            'chaveNfe',
+            'numero_nf',
+            'fornecedor'
+          ]
           out=[]
           for term in terms:
-              out.append(f'\n===== TERM: {term} =====\n')
-              for m in list(re.finditer(re.escape(term), s, re.I))[:50]:
-                  a=max(0,m.start()-1800); b=min(len(s),m.end()+2800)
-                  out.append(s[a:b])
-                  out.append('\n---\n')
-          Path('import-snippets.txt').write_text('\n'.join(out), encoding='utf-8')
+              hits=list(re.finditer(re.escape(term), s, re.I))
+              out.append(f'===== TERM: {term} | HITS: {len(hits)} =====')
+              for i,m in enumerate(hits[:8],1):
+                  a=max(0,m.start()-900); b=min(len(s),m.end()+1400)
+                  out.append(f'--- HIT {i} ---\n'+s[a:b])
+          Path('import-snippets-compact.txt').write_text('\n\n'.join(out), encoding='utf-8')
           PY
       - name: Commit snippets
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add import-snippets.txt
-          git commit -m 'chore: extract import logic snippets' || exit 0
+          git add import-snippets-compact.txt
+          git commit -m 'chore: refine import logic snippets' || exit 0
           git push
