@@ -1,55 +1,148 @@
-name: Extract import snippets
+name: Build local corrected copy
 on:
   push:
     branches: [fix-import-replace]
     paths:
       - '.github/workflows/extract-import-snippets.yml'
 permissions:
-  contents: write
+  contents: read
 jobs:
-  extract:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract exact importer module
+      - name: Patch embedded importer and build local copy
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
-          s=Path('app.html').read_text(encoding='utf-8', errors='replace')
-          phrases=['Notas repetidas do mesmo fornecedor','Processar dados colados','Fornecedor e valor bruto são obrigatórios','Copiar e colar do Excel']
-          hits=[]
-          for ph in phrases:
-              for m in re.finditer(re.escape(ph),s,re.I): hits.append((m.start(),ph))
-          if not hits: raise SystemExit('import UI not found')
-          center=min(x[0] for x in hits)
-          # This app embeds each module as a large HTML string. Capture a focused window around the import screen.
-          a=max(0,center-70000); b=min(len(s),center+90000)
-          w=s[a:b]
-          out=['CENTER='+str(center),'WINDOW='+str(a)+':'+str(b)]
-          # Exact UI context
-          for ph in phrases:
-              i=w.lower().find(ph.lower())
-              if i>=0: out.append('\n===== UI '+ph+' =====\n'+w[max(0,i-2500):i+5000])
-          # Script blocks/functions/calls around importer
-          pats=[r'function\s+[A-Za-z_$][\w$]*\s*\([^)]*\)\s*\{',r'(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*(?:async\s*)?\([^)]*\)\s*=>',r'\.from\s*\(',r'\.insert\s*\(',r'\.upsert\s*\(',r'\.update\s*\(',r'\.select\s*\(',r'addEventListener\s*\(',r'localStorage\.',r'processar',r'importar',r'planilha',r'chave[_A-Za-z-]*nfe',r'numero[_A-Za-z-]*nf']
-          seen=set()
-          for pat in pats:
-              for m in list(re.finditer(pat,w,re.I))[:80]:
-                  aa=max(0,m.start()-1600); bb=min(len(w),m.end()+3200)
-                  key=(aa//500,bb//500)
-                  if key in seen: continue
-                  seen.add(key)
-                  out.append('\n===== CODE '+pat+' @'+str(a+m.start())+' =====\n'+w[aa:bb])
-          text='\n'.join(out)
-          # Cap to connector-friendly size but preserve both beginning and end if huge.
-          if len(text)>180000: text=text[:130000]+'\n\n===== TRUNCATED MIDDLE =====\n\n'+text[-50000:]
-          Path('import-module-exact.txt').write_text(text,encoding='utf-8')
+          import re, base64, sys
+
+          src = Path('app.html')
+          outer = src.read_text(encoding='utf-8', errors='strict')
+          target_phrase = 'Notas repetidas do mesmo fornecedor não serão duplicadas.'
+
+          def find_end(text, brace_pos):
+              depth=0; i=brace_pos; quote=None; esc=False
+              while i < len(text):
+                  c=text[i]
+                  if quote:
+                      if esc: esc=False
+                      elif c=='\\': esc=True
+                      elif c==quote: quote=None
+                  else:
+                      if c in ('"',"'",'`'): quote=c
+                      elif c=='{': depth+=1
+                      elif c=='}':
+                          depth-=1
+                          if depth==0: return i+1
+                  i+=1
+              raise RuntimeError('function closing brace not found')
+
+          def replace_function(text, name, new_code):
+              m=re.search(r'function\\s+'+re.escape(name)+r'\\s*\\([^)]*\\)\\s*\\{', text)
+              if not m: raise RuntimeError('function not found: '+name)
+              brace=text.find('{',m.start())
+              end=find_end(text,brace)
+              return text[:m.start()]+new_code+text[end:]
+
+          visual_old = '<div class="alert">\\n              Notas repetidas do mesmo fornecedor não serão duplicadas.\\n            </div>'
+          visual_new = '''<div class="alert good">\n              <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">\n                <input id="substituirDuplicadasImportacao" type="checkbox" checked style="margin-top:3px">\n                <span><b>Atualizar/substituir registros já existentes</b><br>\n                <small>Quando ativado, a Chave NF-e tem prioridade. Sem chave, o sistema compara Fornecedor + Nº da NF e mantém os dados mais recentes da nova importação.</small></span>\n              </label>\n            </div>'''
+
+          helper = r'''function chaveImportacaoRegistro(x) {
+        const chave = String(x?.chaveNFe || "").replace(/\D/g, "");
+        if (chave.length >= 40) return "CHAVE:" + chave;
+        const fornecedor = String(x?.fornecedor || "").trim().toLocaleUpperCase("pt-BR").replace(/\s+/g, " ");
+        const nf = String(x?.nf || "").trim().toLocaleUpperCase("pt-BR");
+        return fornecedor && nf ? "FORN_NF:" + fornecedor + "|" + nf : "";
+      }
+      function localizarRegistroImportado(x) {
+        const chave = String(x?.chaveNFe || "").replace(/\D/g, "");
+        if (chave.length >= 40) {
+          const iChave = db.findIndex((y) => String(y?.chaveNFe || "").replace(/\D/g, "") === chave);
+          if (iChave >= 0) return iChave;
+        }
+        const fornecedor = String(x?.fornecedor || "").trim().toLocaleUpperCase("pt-BR").replace(/\s+/g, " ");
+        const nf = String(x?.nf || "").trim().toLocaleUpperCase("pt-BR");
+        if (!fornecedor || !nf) return -1;
+        return db.findIndex((y) =>
+          String(y?.fornecedor || "").trim().toLocaleUpperCase("pt-BR").replace(/\s+/g, " ") === fornecedor &&
+          String(y?.nf || "").trim().toLocaleUpperCase("pt-BR") === nf
+        );
+      }
+      '''
+
+          new_preview = r'''function renderPreviewPlanilha() {
+        const atualizaveis = importPreview.filter((x) => localizarRegistroImportado(x) >= 0);
+        const novos = importPreview.length - atualizaveis.length;
+        $("previewPlanilha").innerHTML = `<div class="mini-grid"><div class="summary-box"><small>Linhas válidas</small><b>${importPreview.length}</b></div><div class="summary-box"><small>Registros que serão atualizados</small><b>${atualizaveis.length}</b></div><div class="summary-box"><small>Novos registros</small><b>${novos}</b></div><div class="summary-box grand-total"><small>Total bruto da importação</small><b>${money(importPreview.reduce((s, x) => s + x.bruto, 0))}</b></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="confirmarImportacaoPlanilha()">Importar / atualizar lançamentos</button></div>`;
+      }'''
+
+          new_confirm = r'''function confirmarImportacaoPlanilha() {
+        const substituir = $("substituirDuplicadasImportacao")?.checked !== false;
+        let novos = 0, atualizados = 0, ignorados = 0;
+        importPreview.forEach((registro) => {
+          const i = localizarRegistroImportado(registro);
+          if (i >= 0) {
+            if (substituir) {
+              const idAnterior = db[i]?.id;
+              db[i] = normalizarRegistro({ ...db[i], ...registro, id: idAnterior || registro.id });
+              atualizados++;
+            } else {
+              ignorados++;
+            }
+          } else {
+            db.push(normalizarRegistro(registro));
+            novos++;
+          }
+        });
+        auditLog("Importação de planilha", novos + " novo(s), " + atualizados + " atualizado(s), " + ignorados + " ignorado(s)");
+        persistir();
+        importPreview = [];
+        $("previewPlanilha").innerHTML = `<div class="alert good"><b>Importação concluída.</b><br>${novos} novo(s) registro(s) • ${atualizados} atualizado(s) • ${ignorados} ignorado(s).</div>`;
+        renderAll();
+        renderFinanceiro();
+        renderAuditoria();
+        aviso(novos + " novos • " + atualizados + " atualizados • " + ignorados + " ignorados");
+      }'''
+
+          # Scan quoted base64 payloads used by the suite and patch only the embedded ERP module.
+          rx=re.compile(r'(?P<prefix>"data"\\s*:\\s*")(?P<b64>[A-Za-z0-9+/=]{5000,})(?P<suffix>")')
+          matches=list(rx.finditer(outer))
+          patched=False
+          for m in matches:
+              b64=m.group('b64')
+              try:
+                  dec=base64.b64decode(b64, validate=False).decode('utf-8')
+              except Exception:
+                  continue
+              if target_phrase not in dec or 'function confirmarImportacaoPlanilha' not in dec:
+                  continue
+              if visual_old in dec:
+                  dec=dec.replace(visual_old, visual_new, 1)
+              else:
+                  dec=dec.replace(target_phrase, 'Notas já existentes poderão ser substituídas pelos novos dados importados.', 1)
+              # Add helper functions immediately before preview function.
+              marker='function renderPreviewPlanilha() {'
+              pos=dec.find(marker)
+              if pos < 0: raise RuntimeError('preview marker not found')
+              dec=dec[:pos]+helper+dec[pos:]
+              dec=replace_function(dec,'renderPreviewPlanilha',new_preview)
+              dec=replace_function(dec,'confirmarImportacaoPlanilha',new_confirm)
+              new_b64=base64.b64encode(dec.encode('utf-8')).decode('ascii')
+              outer=outer[:m.start('b64')]+new_b64+outer[m.end('b64'):]
+              patched=True
+              break
+
+          if not patched:
+              raise SystemExit('Embedded ERP importer was not found; no output produced')
+
+          out=Path('NexCompra_IDENTICO_LOCAL_CORRIGIDO.html')
+          out.write_text(outer,encoding='utf-8')
+          print('Created',out,'bytes=',out.stat().st_size)
           PY
-      - name: Commit exact module extract
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add import-module-exact.txt
-          git commit -m 'chore: extract exact importer module' || exit 0
-          git push
+      - name: Upload local corrected HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexCompra-identico-local-corrigido
+          path: NexCompra_IDENTICO_LOCAL_CORRIGIDO.html
+          if-no-files-found: error
